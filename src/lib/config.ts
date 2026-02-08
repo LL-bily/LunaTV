@@ -197,14 +197,37 @@ async function getInitConfig(configFile: string, subConfig: {
   } catch (e) {
     cfgFile = {} as ConfigFileStruct;
   }
+
+  // === 注入你搜集的自定义 API 站点 ===
+  const defaultApiSites: { [key: string]: ApiSite } = {
+    liangzi: { name: '量子资源', api: 'https://cj.lziapi.com/api.php/provide/vod' },
+    feifan: { name: '非凡资源', api: 'https://ffzyapi.com/api.php/provide/vod' },
+    jisu: { name: '极速资源', api: 'https://jszyapi.com/api.php/provide/vod' },
+    kuaiche: { name: '快车资源', api: 'https://caiji.kczyapi.com/api.php/provide/vod' },
+    qiaoji: { name: '巧儿资源', api: 'https://cj.qiaoji8.com/api.php/provide/vod' },
+    bfzy: { name: '暴风资源', api: 'https://bfzyapi.com/api.php/provide/vod' },
+    hongniu: { name: '红牛资源', api: 'https://www.hongniuzy2.com/api.php/provide/vod' },
+    ikun: { name: 'iKun资源', api: 'https://ikunzyapi.com/api.php/provide/vod' },
+    suoni: { name: '索尼资源', api: 'https://suoniapi.com/api.php/provide/vod' },
+    wolong: { name: '卧龙资源', api: 'https://wolongzyw.com/api.php/provide/vod' },
+    tianya: { name: '天涯资源', api: 'https://tyyszy.com/api.php/provide/vod' },
+    baidu: { name: '百度资源', api: 'https://api.apibdzy.com/api.php/provide/vod' },
+    wujin: { name: '无尽资源', api: 'https://api.wujinapi.me/api.php/provide/vod' },
+    zuid: { name: '最大资源', api: 'https://api.zuidapi.com/api.php/provide/vod' },
+    wangwang: { name: '旺旺短剧', api: 'https://wwzy.tv/api.php/provide/vod' },
+    mozhua: { name: '魔爪资源', api: 'https://mozhuazy.com/api.php/provide/vod' },
+    lsb: { name: 'lsb资源', api: 'https://apilsbzy1.com/api.php/provide/vod' },
+    huangcang: { name: '黄色仓库', api: 'https://hsckzy.vip/api.php/provide/vod' }
+  };
+
   const adminConfig: AdminConfig = {
     ConfigFile: configFile,
     ConfigSubscribtion: subConfig,
     SiteConfig: {
-      SiteName: process.env.NEXT_PUBLIC_SITE_NAME || 'MoonTV',
+      SiteName: process.env.NEXT_PUBLIC_SITE_NAME || 'LunaTV',
       Announcement:
         process.env.ANNOUNCEMENT ||
-        '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。',
+        '欢迎使用 LunaTV！本站仅供学习研究使用。',
       SearchDownstreamMaxPage:
         Number(process.env.NEXT_PUBLIC_SEARCH_MAX_PAGE) || 5,
       SiteInterfaceCacheTime: cfgFile.cache_time || 7200,
@@ -246,8 +269,9 @@ async function getInitConfig(configFile: string, subConfig: {
   });
   adminConfig.UserConfig.Users = allUsers as any;
 
-  // 从配置文件中补充源信息
-  Object.entries(cfgFile.api_site || []).forEach(([key, site]) => {
+  // 合并默认源与配置文件中的源
+  const mergedApiSites = { ...defaultApiSites, ...(cfgFile.api_site || {}) };
+  Object.entries(mergedApiSites).forEach(([key, site]) => {
     adminConfig.SourceConfig.push({
       key: key,
       name: site.name,
